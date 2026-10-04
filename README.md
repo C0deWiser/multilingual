@@ -1,8 +1,35 @@
-# Multilingual Model Attributes
+# Multilingual Cast
 
 Multilingual attribute keeps a set of values in different locales.
-
 Such an attribute is stored in a database as a JSON object.
+
+| id | name                           |
+|----| ------------------------------ |
+| 1  | {"en":"Michael","es":"Miguel"} |
+
+`Multilingual` lets you deal with such an attribute just like a plain one:
+
+```php
+$user->name;
+// Michael
+
+app()->setLocale('es');
+
+$user->name = 'Miguel';
+
+$user->name;
+// Miguel
+
+app()->setLocale('en');
+
+$user->name;
+// Michael
+```
+
+## Usage
+
+Apply the cast and include `HasMultilingual`, which gives access to the lowdown
+of a multilingual attribute.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -237,7 +264,7 @@ $user->multilingual('keywords')->toArray();
 // ['en' => ['one', 'two'], 'es' => ['uno', 'dos']]
 ```
 
-## Map into object
+## Multilingual objects
 
 Multilingual array could be
 [mapped into](https://laravel.com/framework/docs/13.x/collections#method-mapinto)
@@ -315,9 +342,51 @@ The write back hangs on `getAttributes()`, which is what `getDirty()`,
 `getAttributes()` overrides the one from the trait, and then it has to call
 `flushMultilingualAttributes()` itself.
 
-## Array of multilingual
+## Multilingual collection
 
-It is possible to keep an array where each element is a `Multilingual`:
+You may cast an attribute to a collection of `Multilingual` values. It is
+possible to map every row into an object. Strict mode is supported as well:
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
+use Illuminate\Support\Collection;
+
+/**
+ * @property null|Collection<int, Username> $names
+ */
+class User extends Model
+{
+    use HasMultilingual;
+
+    protected function casts(): array
+    {
+        return [
+            'names' => AsMultilingual::collect(Username::class, strict: true),
+        ];
+    }
+}
+
+$user->names = [
+    ['en' => ['first_name' => 'John', 'last_name' => 'Smith']],
+    ['en' => ['first_name' => 'Gregory', 'last_name' => 'Johnson']],
+];
+
+$user->names->first();
+// Username(['first_name' => 'John', 'last_name' => 'Smith'])
+
+$user->multilingual('names')->first();
+// Multilingual<Username> holding the very same object
+
+$user->names->first()->first_name = 'Johnny';
+// changes the attribute, just like a mapped attribute does
+```
+
+## Multilingual collection (Laravel's cast)
+
+It is possible to cast `Multilingual` to a collection using Laravel's
+`AsCollection`:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -354,48 +423,9 @@ $user->withLocale('es', fn() => $user->keywords->first()->get());
 ```
 
 `AsCollection::of()` maps into the class directly, so it never routes through
-the cast. Elements are always `Multilingual` objects here, and the attribute is
-not recognised as multilingual: `multilingual()` throws an
-`InvalidArgumentException`, and `Multilingual::of()` leaves it untouched. Use the
-cast below when the whole collection has to be hydrated.
+the cast. Elements are always `Multilingual` objects here.
 
-## Multilingual collection
-
-Casting an attribute into a collection of `Multilingual` instead routes through
-the cast, so it may be mapped into objects as well:
-
-```php
-use Illuminate\Database\Eloquent\Model;
-use Codewiser\Multilingual\Casts\AsMultilingual;
-use Codewiser\Multilingual\Traits\HasMultilingual;
-use Illuminate\Support\Collection;
-
-/**
- * @property null|Collection<int, Username> $names
- */
-class User extends Model
-{
-    use HasMultilingual;
-
-    protected function casts(): array
-    {
-        return [
-            'names' => AsMultilingual::collect(Username::class)
-        ];
-    }
-}
-
-$user->names = [
-    ['en' => ['first_name' => 'John', 'last_name' => 'Smith']],
-    ['en' => ['first_name' => 'Gregory', 'last_name' => 'Johnson']],
-];
-
-$user->names->first();
-// Username(['first_name' => 'John', 'last_name' => 'Smith'])
-
-$user->multilingual('names')->first();
-// Multilingual<Username> holding the very same object
-
-$user->names->first()->first_name = 'Johnny';
-// changes the attribute, just like a mapped attribute does
-```
+The attribute is not recognised as multilingual though, so `multilingual()`
+throws an `InvalidArgumentException` for it, and `Multilingual::of()` leaves it
+untouched. Use `AsMultilingual::collect()` above when the whole collection has to
+be hydrated.

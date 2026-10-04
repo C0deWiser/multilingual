@@ -1,10 +1,11 @@
 {
   "name": "codewiser/multilingual",
-  "description": "Multilingual Model Attributes for Laravel",
+  "description": "Multilingual Cast for Laravel",
   "keywords": [
     "Laravel",
     "Multilingual",
-    "i18n"
+    "i18n",
+    "Cast"
   ],
   "type": "library",
   "license": "MIT",

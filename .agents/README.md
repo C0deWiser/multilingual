@@ -50,8 +50,6 @@ There is no `lang/` directory, no `tests/Translator.php` and no
 
 ## Known gaps
 
-- `README.md` still imports `Codewiser\Intl\Casts\*` and `Codewiser\Intl\Traits\*`.
-  Every code sample in it is broken until it moves to the new namespace.
 - `tests/MultilingualTest.php:407` has a leftover `dump($casted)` in
   `testCastGet`, so the suite prints a value mid-run.
 - `testMultilingualAcceptsCollectionAttributes` asserts
