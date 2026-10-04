@@ -1,178 +1,14 @@
-# Intl Helper
-
-## Configuration
-
-`IntlManager` service is a helper to access main `intl` php functions.
-
-You may configure `IntlManager` defaults in your application's 
-`AppServiceProvider` class:
-
-```php
-use Codewiser\Intl\IntlManager;
-
-/**
- * Register any application services.
- */
-public function register(): void
-{
-    $this->app->extend(IntlManager::class, fn (IntlManager $intl) => $intl
-        ->useCalendar(\IntlDateFormatter::GREGORIAN)
-        ->useCurrency('USD')
-        // see https://www.php.net/manual/en/transliterator.listids.php
-        ->useTransliterator('Any-Latin')
-    );
-}
-```
-
-`intl()` is a synonym of `app(IntlManager::class)`.
-
-## Datetime
-
-Format date and time respecting the app's current locale.
-
-```php
-intl()->date($date)->format(
-    date: \IntlDateFormatter::FULL, 
-    time: \IntlDateFormatter::SHORT
-);
-// Saturday, April 12, 1952 at 3:30 PM
-
-intl()->date($date)->format(date: \IntlDateFormatter::SHORT);
-// 4/12/52
-
-intl()->date($date)->format(time: \IntlDateFormatter::FULL);
-// 3:30:42 PM Coordinated Universal Time
-```
-
-### Skeletons
-
-The styles above only offer the fixed `LONG`/`MEDIUM`/`SHORT` sets, so they
-cannot express "Sat, Oct 3" or "Q4 2026". A skeleton names the fields to show and
-lets ICU choose the pattern the locale prefers:
-
-```php
-intl()->date($date)->skeleton('yMMMEd');
-// Sat, Oct 3, 2026
-
-intl()->date($date)->skeleton('yQQQ');
-// Q4 2026
-
-intl()->date($date)->skeleton('Hm');
-// 15:04
-```
-
-### Relative time
-
-```php
-intl()->date(now()->subDays(3))->relative();
-// 3 days ago
-
-intl()->date(now()->addHours(2))->relative();
-// 2 hours from now
-
-intl()->date($then)->relative($now);
-// Measured against another moment rather than the current time
-```
-
-## Date period
-
-Format date period respecting the app's current locale.
-
-Date period may be passed either as `\DatePeriod` object,
-or as two `\DateTimeInterface` objects (array or variadic).
-
-```php
-$period = now()->toPeriod(now()->addHour());
-
-intl()
-    ->period($period)
-    ->format(\IntlDateFormatter::LONG, \IntlDateFormatter::LONG);
-# April 12, 1952 from 3:30:42 PM UTC to 4:30:42 PM UTC
-```
-
-### Translations
-
-The period sentences and the relative-time patterns come from the translations
-shipped with the package. Publish them to override:
-
-```shell
-php artisan vendor:publish --tag=intl
-```
-
-## Numbers
-
-```php
-// Shortcuts:
-
-intl()->number(1234.56)->currency('EUR'); // €1,234.56
-intl()->number(1234.56)->decimal();       // 1,234.56
-intl()->number(1234.56)->percent();       // 123,456%
-intl()->number(1234.56)->spellout();      // one thousand two hundred thirty-four point five six
-intl()->number(1234.56)->ordinal();       // 1,235th
-intl()->number(1234.56)->duration();      // 20:35
-intl()->number(1234.56)->scientific();    // 1.23456E3
-
-// Base:
-intl()->number(1234.56)->format(\NumberFormatter::DECIMAL);
-```
-
-## Names
-
-A locale and a currency both have names, which is what a language switcher and a
-currency selector need:
-
-```php
-intl()->locale('zh_Hant_TW')->display();
-// Chinese (Traditional, Taiwan)
-
-intl()->locale('pt_BR')->region();
-// Brazil
-
-intl()->locale('de')->display('ru');
-// немецкий (locale override)
-
-intl()->currency()->name();
-// Euro — the app's default currency
-
-intl()->currency('RUB')->name('fr');
-// rouble russe (locale override)
-
-intl()->currency('RUB')->symbol('ru');
-// ₽ in a Russian locale
-
-intl()->currency('RUB')->symbol('en');
-// RUB in an English one
-```
-
-## Transliteration
-
-Useful for turning a name into something a URL or a search box can carry:
-
-```php
-intl()->text()->convert('Шёлковый пух', 'Russian-Latin/BGN');
-// Shëlkovyy pukh
-
-intl()->text()->convert('北京', 'Han-Latin');
-// běi jīng
-```
-
-Normalization is the same machinery and matters because Unicode writes the same
-text in more than one way:
-
-```php
-intl()->text()->normalize("e\u{0301}");     // é as one code point
-intl()->text()->isNormalized($text);        // already in NFC?
-```
-
 # Multilingual Model Attributes
+
+Multilingual attribute keeps a set of values in different locales.
 
 Such an attribute is stored in a database as a JSON object.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
-use Codewiser\Intl\Casts\Multilingual;
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 
 /**
  * @property null|string $name
@@ -197,7 +33,7 @@ A new value will be implicitly stored in the current locale.
 However, you may explicitly define a locale.
 
 ```php
-// Set value in default locale
+// Set value in current locale
 $user->name = 'Michael';
 
 // Set value with explicit locale
@@ -217,8 +53,8 @@ A plain value will be implicitly retrieved in the current locale. It is enough
 to properly apply the `Accept-Language` header from a User-Agent — and the user
 will get content in a preferred language.
 
-If the value for the requested locale is empty, the fallback locale will be 
-tried, or the first non-empty value will be returned.
+If there is no value for the requested locale, the fallback locale is tried
+next, and then the first value in the map — even when that value is empty.
 
 You may explicitly define a locale.
 
@@ -286,9 +122,9 @@ Ask for it explicitly wherever every locale belongs in the output.
 
 ## Language tags
 
-You may access a hydrated `Multilingual` using language tags as well. 
-Package uses 
-[locale_filter_matches](https://www.php.net/manual/ru/locale.filtermatches.php)
+You may access a hydrated `Multilingual` using language tags as well. The
+package uses
+[locale_filter_matches](https://www.php.net/manual/en/locale.filtermatches.php)
 to find the best variant:
 
 ```php
@@ -327,9 +163,9 @@ value:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
-use Codewiser\Intl\Casts\Multilingual;
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 
 /**
  * @property null|float $score
@@ -364,9 +200,9 @@ As we may keep multilingual scalars, we may keep multilingual arrays as well:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
-use Codewiser\Intl\Casts\Multilingual;
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 
 /**
  * @property null|array $keywords
@@ -403,15 +239,15 @@ $user->multilingual('keywords')->toArray();
 
 ## Map into object
 
-Multiligual array could be 
+Multilingual array could be
 [mapped into](https://laravel.com/framework/docs/13.x/collections#method-mapinto)
 an object:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
-use Codewiser\Intl\Casts\Multilingual;
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 
 /**
  * @property null|Username $name
@@ -436,7 +272,7 @@ $user->name = [
 $user->withLocale('en', fn() => $user->name);
 // Username(['first_name' => 'John', 'last_name' => 'Smith'])
 
-$user->withLocale('es', fn() => $user->keywords);
+$user->withLocale('es', fn() => $user->name);
 // Username(['first_name' => 'Juan', 'last_name' => 'Herrera'])
 ```
 
@@ -485,8 +321,8 @@ It is possible to keep an array where each element is a `Multilingual`:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
-use Codewiser\Intl\Casts\Multilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 
@@ -518,8 +354,10 @@ $user->withLocale('es', fn() => $user->keywords->first()->get());
 ```
 
 `AsCollection::of()` maps into the class directly, so it never routes through
-the cast. Elements are always `Multilingual` objects here, and hydrating has no
-effect on them.
+the cast. Elements are always `Multilingual` objects here, and the attribute is
+not recognised as multilingual: `multilingual()` throws an
+`InvalidArgumentException`, and `Multilingual::of()` leaves it untouched. Use the
+cast below when the whole collection has to be hydrated.
 
 ## Multilingual collection
 
@@ -528,8 +366,8 @@ the cast, so it may be mapped into objects as well:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 use Illuminate\Support\Collection;
 
 /**
@@ -543,7 +381,7 @@ class User extends Model
     {
         return [
             'names' => AsMultilingual::collect(Username::class)
-        ]
+        ];
     }
 }
 

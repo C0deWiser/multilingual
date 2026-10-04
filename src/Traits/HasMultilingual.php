@@ -1,12 +1,12 @@
 <?php
 
-namespace Codewiser\Intl\Traits;
+namespace Codewiser\Multilingual\Traits;
 
 use Closure;
-use Codewiser\Intl\Casts\AsCollection;
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Casts\CastsMultilingual;
-use Codewiser\Intl\Casts\Multilingual;
+use Codewiser\Multilingual\Casts\AsCollection;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Casts\CastsMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Localizable;
 use InvalidArgumentException;
@@ -107,7 +107,7 @@ trait HasMultilingual
      *
      * @param  string|Closure  $key  Attribute name, or a callback reading attributes.
      *
-     * @return mixed|Multilingual|Collection
+     * @return Multilingual|Collection<array-key, Multilingual>
      *
      * @throws InvalidArgumentException When the attribute is not casted as Multilingual.
      */

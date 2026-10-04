@@ -1,61 +1,59 @@
 {
-    "name": "codewiser/intl",
-    "description": "Internationalization Helper",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Codewiser\\Intl\\": "src/"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Codewiser\\Intl\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/",
-            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
-            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
-        }
-    },
-    "authors": [
-        {
-            "name": "pm",
-            "email": "pm@101media.ru"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require": {
-        "php": "^8.2",
-        "ext-intl": "*",
-        "laravel/framework": ">=12.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^11.0",
-        "fakerphp/faker": "^1.23",
-        "orchestra/testbench": "^10.12"
-    },
-    "scripts": {
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare"
-        ],
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "test": "@php vendor/bin/testbench package:test",
-        "build": "@php vendor/bin/testbench workbench:build --ansi",
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@build",
-            "@php vendor/bin/testbench serve --ansi"
-        ]
-    },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Codewiser\\Intl\\IntlServiceProvider"
-      ]
+  "name": "codewiser/multilingual",
+  "description": "Multilingual Model Attributes for Laravel",
+  "keywords": [
+    "Laravel",
+    "Multilingual",
+    "i18n"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Codewiser\\Multilingual\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Codewiser\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/",
+      "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+      "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+    }
+  },
+  "authors": [
+    {
+      "name": "pm",
+      "email": "pm@101media.ru"
+    }
+  ],
+  "suggest": {
+    "codewiser/intl": "Intl helper for Laravel",
+    "codewiser/casts": "Object casting, enum collection, morph validator for Laravel"
+  },
+  "minimum-stability": "stable",
+  "require": {
+    "php": "^8.2",
+    "laravel/framework": ">=12.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0",
+    "fakerphp/faker": "^1.23",
+    "orchestra/testbench": "^10.12"
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@clear",
+      "@prepare"
+    ],
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "test": "@php vendor/bin/testbench package:test",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve --ansi"
+    ]
   }
 }

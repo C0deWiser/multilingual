@@ -1,6 +1,6 @@
 <?php
 
-namespace Codewiser\Intl\Casts;
+namespace Codewiser\Multilingual\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Support\Arrayable;

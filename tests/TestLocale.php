@@ -1,6 +1,6 @@
 <?php
 
-namespace Codewiser\Intl\Tests\Casts;
+namespace Codewiser\Tests;
 
 /**
  * Locale identifiers as a backed enum, to cover the BackedEnum code paths.

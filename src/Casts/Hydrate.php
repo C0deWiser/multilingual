@@ -1,6 +1,6 @@
 <?php
 
-namespace Codewiser\Intl\Casts;
+namespace Codewiser\Multilingual\Casts;
 
 /**
  * Hydration hands out the whole multilingual attribute instead of a plain value

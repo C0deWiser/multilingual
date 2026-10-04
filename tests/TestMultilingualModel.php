@@ -1,10 +1,10 @@
 <?php
 
-namespace Codewiser\Intl\Tests\Casts;
+namespace Codewiser\Tests;
 
-use Codewiser\Intl\Casts\AsMultilingual;
-use Codewiser\Intl\Casts\Multilingual;
-use Codewiser\Intl\Traits\HasMultilingual;
+use Codewiser\Multilingual\Casts\AsMultilingual;
+use Codewiser\Multilingual\Casts\Multilingual;
+use Codewiser\Multilingual\Traits\HasMultilingual;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;

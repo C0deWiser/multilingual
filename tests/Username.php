@@ -1,6 +1,6 @@
 <?php
 
-namespace Codewiser\Intl\Tests\Casts;
+namespace Codewiser\Tests;
 
 use Illuminate\Contracts\Support\Arrayable;
 
