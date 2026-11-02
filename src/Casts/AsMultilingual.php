@@ -80,6 +80,7 @@ class AsMultilingual implements Castable
                     // Replace current locale
                     $values = $attributes[$key] ?? null;
                     $values = $values ? json_decode($values, true) : [];
+                    $values = is_array($values) ? $values : [];
                     $values = new Multilingual($values, $this->strict);
 
                     $values[$values->getLocale()] = $value;
